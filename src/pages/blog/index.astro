@@ -1,0 +1,25 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+---
+
+<BaseLayout title="Blog | Mandy Chen">
+  <h1>Blog</h1>
+  <ul class="post-list">
+    {posts.map((post) => (
+      <li class="post-item">
+        <time>{post.data.pubDate.toISOString().slice(0, 10)}</time>
+        <div>
+          <a class="post-title" href={`/blog/${post.id}`}>{post.data.title}</a>
+          <div class="post-tags">
+            {post.data.tags.map((t) => <a class="post-tag" href={`/blog/tags/${t}`}>{t}</a>)}
+          </div>
+        </div>
+      </li>
+    ))}
+  </ul>
+</BaseLayout>

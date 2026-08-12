@@ -1,0 +1,25 @@
+---
+import BaseLayout from './BaseLayout.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  pubDate: Date;
+  tags: string[];
+}
+const { title, description, pubDate, tags } = Astro.props;
+const dateStr = pubDate.toISOString().slice(0, 10);
+---
+
+<BaseLayout title={`${title} | Mandy Chen`} description={description}>
+  <article>
+    <header class="post-header">
+      <h1>{title}</h1>
+      <div class="post-meta">
+        <time datetime={dateStr}>{dateStr}</time>
+        {tags.map((t) => <a class="post-tag" href={`/blog/tags/${t}`}>{t}</a>)}
+      </div>
+    </header>
+    <slot />
+  </article>
+</BaseLayout>

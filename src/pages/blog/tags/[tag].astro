@@ -1,0 +1,29 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  const tags = [...new Set(posts.flatMap((p) => p.data.tags))];
+  return tags.map((tag) => ({
+    params: { tag },
+    props: { posts: posts.filter((p) => p.data.tags.includes(tag)) },
+  }));
+}
+
+const { tag } = Astro.params;
+const { posts } = Astro.props;
+const sorted = posts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+---
+
+<BaseLayout title={`#${tag} | Mandy Chen`}>
+  <h1>#{tag}</h1>
+  <ul class="post-list">
+    {sorted.map((post) => (
+      <li class="post-item">
+        <time>{post.data.pubDate.toISOString().slice(0, 10)}</time>
+        <a class="post-title" href={`/blog/${post.id}`}>{post.data.title}</a>
+      </li>
+    ))}
+  </ul>
+</BaseLayout>
