@@ -22,9 +22,9 @@ const dateStr = pubDate.toISOString().slice(0, 10);
     </header>
     <slot />
   </article>
-</BaseLayout>
 
-<script>
-  import { initDiagrams } from '../scripts/diagrams';
-  initDiagrams();
-</script>
+  <script>
+    import { initDiagrams } from '../scripts/diagrams';
+    initDiagrams();
+  </script>
+</BaseLayout>
