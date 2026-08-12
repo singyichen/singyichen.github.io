@@ -17,7 +17,7 @@
 
 ## Global Constraints
 
-- Node.js >= 20(Astro 5 要求;開工前 `node -v` 確認)
+- Node.js >= 22.12(最新 Astro 5 要求;本機用 Homebrew keg-only 的 node@22,所有 npm/node 指令加 PATH 前綴 `PATH="/opt/homebrew/opt/node@22/bin:$PATH"`;CI 的 withastro/action 需指定 node-version 22)
 - `site: 'https://singyichen.github.io'`,部落格路徑 `/blog`
 - 不用 Tailwind;樣式一律原生 CSS custom properties
 - 雙主題 tokens:`:root` 淺色、`[data-theme="dark"]` 深色;元件與圖表不得寫死只屬於單一主題的顏色
