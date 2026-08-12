@@ -1,5 +1,12 @@
-import { useMemo, useState } from 'react';
-import { Background, Controls, ReactFlow, type Edge, type Node } from '@xyflow/react';
+import { useEffect, useMemo, useState } from 'react';
+import {
+  Background,
+  Controls,
+  ReactFlow,
+  useNodesState,
+  type Edge,
+  type Node,
+} from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { useThemeTokens } from '../../shared/useThemeTokens';
 
@@ -12,28 +19,45 @@ const STEPS = [
   { id: 'generate', label: 'LLM 生成', desc: '模型基於檢索到的內容作答,並標註來源。' },
 ];
 
+type Tokens = Partial<Record<'bg-card' | 'text' | 'accent' | 'border', string>>;
+
+function nodeStyle(t: Tokens, accent: string, i: number, step: number) {
+  return {
+    background: t['bg-card'] || '#f4f4f2',
+    color: t['text'] || '#1f2328',
+    border: `2px solid ${i <= step ? accent : t['border'] || '#e5e7e6'}`,
+    borderRadius: 10,
+    opacity: i <= step ? 1 : 0.5,
+    fontWeight: i === step ? 700 : 400,
+  };
+}
+
+function buildInitialNodes(): Node[] {
+  return STEPS.map((s, i) => ({
+    id: s.id,
+    position: { x: (i % 3) * 220, y: Math.floor(i / 3) * 140 },
+    data: { label: s.label },
+    style: nodeStyle({}, '#0e7c66', i, 0),
+  }));
+}
+
 export default function RagPipelineFlow() {
   const [step, setStep] = useState(0);
   const t = useThemeTokens(['bg-card', 'text', 'accent', 'border']);
   const accent = t['accent'] || '#0e7c66';
 
-  const nodes: Node[] = useMemo(
-    () =>
-      STEPS.map((s, i) => ({
-        id: s.id,
-        position: { x: (i % 3) * 220, y: Math.floor(i / 3) * 140 },
-        data: { label: s.label },
-        style: {
-          background: t['bg-card'] || '#f4f4f2',
-          color: t['text'] || '#1f2328',
-          border: `2px solid ${i <= step ? accent : t['border'] || '#e5e7e6'}`,
-          borderRadius: 10,
-          opacity: i <= step ? 1 : 0.5,
-          fontWeight: i === step ? 700 : 400,
-        },
-      })),
-    [step, t]
-  );
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node>(buildInitialNodes());
+
+  // Restyle nodes in place on step/theme changes without touching `position`,
+  // so drags (which live only in React Flow's node state) survive.
+  useEffect(() => {
+    setNodes((ns) =>
+      ns.map((n) => {
+        const i = STEPS.findIndex((s) => s.id === n.id);
+        return { ...n, style: nodeStyle(t, accent, i, step) };
+      })
+    );
+  }, [step, t, accent, setNodes]);
 
   const edges: Edge[] = useMemo(
     () =>
@@ -50,7 +74,13 @@ export default function RagPipelineFlow() {
   return (
     <div className="flow-demo">
       <div style={{ height: 340 }}>
-        <ReactFlow nodes={nodes} edges={edges} fitView proOptions={{ hideAttribution: true }}>
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={onNodesChange}
+          fitView
+          proOptions={{ hideAttribution: true }}
+        >
           <Background />
           <Controls showInteractive={false} />
         </ReactFlow>

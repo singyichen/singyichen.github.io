@@ -23,13 +23,27 @@ export function initDiagrams(): void {
   });
   if (blocks.length === 0) return;
   void renderAll();
-  window.addEventListener('themechange', () => void renderAll());
+  // Markmap's link colors come from a theme-independent d3 ordinal scale and
+  // its labels are foreignObject HTML that inherit `color` from the page, so
+  // it never needs to be re-rendered on theme change. Re-rendering it here
+  // would replace the SVG out from under the live Markmap instance (which is
+  // never destroyed), leaving its d3-zoom/d3-transition callbacks to fire
+  // against a detached node and throw — and it'd also discard the reader's
+  // collapse/pan state. Only mermaid depends on the theme, so only it
+  // re-renders.
+  window.addEventListener('themechange', () => void renderMermaidOnly());
 }
 
 async function renderAll(): Promise<void> {
   const dark = document.documentElement.dataset.theme === 'dark';
   if (blocks.some((b) => b.type === 'mermaid')) await renderMermaid(dark);
   if (blocks.some((b) => b.type === 'markmap')) await renderMarkmap();
+}
+
+async function renderMermaidOnly(): Promise<void> {
+  if (!blocks.some((b) => b.type === 'mermaid')) return;
+  const dark = document.documentElement.dataset.theme === 'dark';
+  await renderMermaid(dark);
 }
 
 async function renderMermaid(dark: boolean): Promise<void> {

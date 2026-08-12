@@ -239,7 +239,6 @@ article img, article svg { max-width: 100%; }
 .diagram:fullscreen { display: flex; flex-direction: column; }
 .diagram:fullscreen .diagram-viewport { flex: 1; display: flex; align-items: center; justify-content: center; }
 .diagram-markmap .markmap-svg { width: 100%; height: 420px; }
-.diagram-markmap .markmap-svg text { fill: var(--text); }
 .diagram-error { color: var(--danger); white-space: pre-wrap; padding: 16px; }
 
 /* ---- Interactive components (React Flow + Recharts) ---- */
