@@ -1,0 +1,89 @@
+:root {
+  --bg: #fdfdfc;
+  --bg-card: #f4f4f2;
+  --text: #1f2328;
+  --text-muted: #6b7280;
+  --accent: #0e7c66;
+  --border: #e5e7e6;
+  --radius: 14px;
+}
+
+[data-theme='dark'] {
+  --bg: #0f1115;
+  --bg-card: #161922;
+  --text: #e8e9ec;
+  --text-muted: #9096a3;
+  --accent: #7dd3c0;
+  --border: #262a35;
+}
+
+* { box-sizing: border-box; }
+
+html { color-scheme: light; }
+[data-theme='dark'] { color-scheme: dark; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang TC', 'Noto Sans TC', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.75;
+}
+
+main { max-width: 720px; margin: 0 auto; padding: 48px 24px 96px; }
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-nav {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.site-nav .site-title { font-weight: 700; color: var(--text); }
+.site-nav .spacer { flex: 1; }
+.site-nav a { color: var(--text-muted); }
+.site-nav a:hover { color: var(--text); text-decoration: none; }
+
+.theme-toggle {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px 10px;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.site-footer {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px;
+  color: var(--text-muted);
+  font-size: 13px;
+  border-top: 1px solid var(--border);
+}
+
+h1 { font-size: 32px; letter-spacing: -0.01em; line-height: 1.3; }
+h2 { font-size: 22px; margin-top: 2em; }
+h3 { font-size: 18px; }
+
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.9em;
+  background: var(--bg-card);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+pre { border-radius: var(--radius); padding: 16px 20px; overflow-x: auto; }
+pre code { background: none; padding: 0; }
+
+/* shiki 雙主題:defaultColor 是淺色,深色時套用 --shiki-dark 變數 */
+[data-theme='dark'] .astro-code,
+[data-theme='dark'] .astro-code span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
+}
