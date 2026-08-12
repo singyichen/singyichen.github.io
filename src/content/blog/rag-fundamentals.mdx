@@ -5,6 +5,9 @@ pubDate: 2026-08-12
 tags: ['rag', 'llm', 'ai-engineering']
 ---
 
+import RagPipelineFlow from '../../components/posts/rag-fundamentals/RagPipelineFlow.tsx';
+import ChunkSizeChart from '../../components/posts/rag-fundamentals/ChunkSizeChart.tsx';
+
 RAG(Retrieval-Augmented Generation)是把「檢索」接到「生成」前面的架構。本文骨架,內容由後續 task 補完。
 
 ```mermaid
@@ -15,6 +18,10 @@ flowchart LR
   K --> P[Prompt 組裝]
   P --> G[LLM 生成]
 ```
+
+<RagPipelineFlow client:visible />
+
+<ChunkSizeChart client:visible />
 
 ```markmap
 # RAG
