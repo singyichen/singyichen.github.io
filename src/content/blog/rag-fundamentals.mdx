@@ -6,3 +6,25 @@ tags: ['rag', 'llm', 'ai-engineering']
 ---
 
 RAG(Retrieval-Augmented Generation)是把「檢索」接到「生成」前面的架構。本文骨架,內容由後續 task 補完。
+
+```mermaid
+flowchart LR
+  Q[使用者問題] --> E[Embedding]
+  E --> R[向量檢索]
+  R --> K[Rerank]
+  K --> P[Prompt 組裝]
+  P --> G[LLM 生成]
+```
+
+```markmap
+# RAG
+## 索引
+### Chunking
+### Embedding
+## 檢索
+### Top-K
+### Rerank
+## 生成
+### Prompt 組裝
+### 引用來源
+```

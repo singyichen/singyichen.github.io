@@ -6,6 +6,7 @@
   --accent: #0e7c66;
   --border: #e5e7e6;
   --radius: 14px;
+  --danger: #c0392b;
 }
 
 [data-theme='dark'] {
@@ -15,6 +16,7 @@
   --text-muted: #9096a3;
   --accent: #7dd3c0;
   --border: #262a35;
+  --danger: #e5675b;
 }
 
 * { box-sizing: border-box; }
@@ -203,3 +205,39 @@ p { margin: 0 0 14px; }
 .post-tag::before { content: '#'; }
 .post-header .post-meta { color: var(--text-muted); font-size: 14px; display: flex; gap: 12px; }
 article img, article svg { max-width: 100%; }
+
+/* ---- Diagram (mermaid / markmap) styles ---- */
+
+.diagram {
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  margin: 24px 0;
+  overflow: hidden;
+}
+.diagram-viewport { overflow: hidden; cursor: grab; touch-action: none; }
+.diagram-viewport:active { cursor: grabbing; }
+.diagram-canvas { transform-origin: 0 0; padding: 16px; width: fit-content; margin: 0 auto; }
+.diagram-toolbar {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  display: flex;
+  gap: 6px;
+}
+.diagram-btn {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 2px 8px;
+}
+.diagram-btn:hover { color: var(--text); }
+.diagram:fullscreen { display: flex; flex-direction: column; }
+.diagram:fullscreen .diagram-viewport { flex: 1; display: flex; align-items: center; justify-content: center; }
+.diagram-markmap .markmap-svg { width: 100%; height: 420px; }
+.diagram-markmap .markmap-svg text { fill: var(--text); }
+.diagram-error { color: var(--danger); white-space: pre-wrap; padding: 16px; }

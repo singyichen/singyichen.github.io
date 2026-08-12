@@ -23,3 +23,8 @@ const dateStr = pubDate.toISOString().slice(0, 10);
     <slot />
   </article>
 </BaseLayout>
+
+<script>
+  import { initDiagrams } from '../scripts/diagrams';
+  initDiagrams();
+</script>
