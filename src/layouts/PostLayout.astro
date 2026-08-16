@@ -1,17 +1,20 @@
 ---
 import BaseLayout from './BaseLayout.astro';
+import ReadingProgressBar from '../components/blog/ReadingProgressBar.tsx';
 
 interface Props {
   title: string;
   description: string;
   pubDate: Date;
   tags: string[];
+  slug: string;
 }
-const { title, description, pubDate, tags } = Astro.props;
+const { title, description, pubDate, tags, slug } = Astro.props;
 const dateStr = pubDate.toISOString().slice(0, 10);
 ---
 
 <BaseLayout title={`${title} | Mandy Chen`} description={description}>
+  <ReadingProgressBar slug={slug} client:load />
   <article>
     <header class="post-header">
       <h1>{title}</h1>

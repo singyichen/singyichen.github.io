@@ -7,6 +7,7 @@
   --border: #e5e7e6;
   --radius: 14px;
   --danger: #c0392b;
+  --track: #e9ecef;
 }
 
 [data-theme='dark'] {
@@ -17,6 +18,7 @@
   --accent: #7dd3c0;
   --border: #262a35;
   --danger: #e5675b;
+  --track: #262b33;
 }
 
 * { box-sizing: border-box; }
@@ -263,3 +265,18 @@ article img, article svg { max-width: 100%; }
 .chart-demo-controls { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; color: var(--text-muted); font-size: 14px; }
 .chart-demo-controls button.active { border-color: var(--accent); color: var(--accent); }
 .chart-note { font-size: 12px; }
+
+/* ── 閱讀進度條 ───────────────────────────────────────────── */
+.reading-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--track);
+  z-index: 50;
+}
+.reading-bar-fill {
+  height: 100%;
+  background: var(--accent);
+}
