@@ -27,8 +27,12 @@ export function pickResume(
 ): { slug: string; entry: ProgressEntry } | null {
   let best: { slug: string; entry: ProgressEntry } | null = null;
 
+  // 此函式接收來自 localStorage 解析的資料,無型別保證。
+  // 即使 pct 或 at 符合 isReading() 邏輯,仍需驗證它們是有效的數值,
+  // 否則 NaN 會導致 tie-break 比較永久失效、無法再被新的有效資料取代。
   for (const [slug, entry] of Object.entries(map)) {
     if (!isReading(entry)) continue;
+    if (!Number.isFinite(entry.pct) || !Number.isFinite(entry.at)) continue;
     if (best === null || entry.at > best.entry.at) {
       best = { slug, entry };
     }

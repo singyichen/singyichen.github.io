@@ -63,4 +63,20 @@ describe('pickResume', () => {
     };
     expect(pickResume(map)).toEqual({ slug: 'reading', entry: entry(30, 1000) });
   });
+
+  it('跳過 at 是 NaN 的條目,選有效的舊條目', () => {
+    const map: ProgressMap = {
+      corrupted: { pct: 50, scrollY: 0, at: NaN },
+      valid: entry(40, 1000),
+    };
+    expect(pickResume(map)).toEqual({ slug: 'valid', entry: entry(40, 1000) });
+  });
+
+  it('跳過 pct 非有限數值的條目', () => {
+    const map: ProgressMap = {
+      corrupted: { pct: NaN, scrollY: 0, at: 1000 },
+      valid: entry(50, 2000),
+    };
+    expect(pickResume(map)).toEqual({ slug: 'valid', entry: entry(50, 2000) });
+  });
 });
