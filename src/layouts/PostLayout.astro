@@ -1,6 +1,7 @@
 ---
 import BaseLayout from './BaseLayout.astro';
 import ReadingProgressBar from '../components/blog/ReadingProgressBar.tsx';
+import ResumePrompt from '../components/blog/ResumePrompt.tsx';
 
 interface Props {
   title: string;
@@ -23,6 +24,7 @@ const dateStr = pubDate.toISOString().slice(0, 10);
         {tags.map((t) => <a class="post-tag" href={`/blog/tags/${t}`}>{t}</a>)}
       </div>
     </header>
+    <ResumePrompt slug={slug} client:load />
     <slot />
   </article>
 
