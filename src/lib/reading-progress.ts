@@ -40,3 +40,81 @@ export function pickResume(
 
   return best;
 }
+
+export const PROGRESS_KEY = 'blog:progress:v1';
+export const FAVORITES_KEY = 'blog:favorites:v1';
+
+export type StorageLike = Pick<Storage, 'getItem' | 'setItem'>;
+
+/**
+ * 取得預設 storage。SSR 時沒有 localStorage,Safari 隱私模式存取會直接拋錯,
+ * 兩種情況都回傳 null,由呼叫端走安全預設值。
+ */
+function defaultStore(): StorageLike | null {
+  try {
+    return typeof localStorage === 'undefined' ? null : localStorage;
+  } catch {
+    return null;
+  }
+}
+
+function readJson<T>(store: StorageLike | null, key: string, fallback: T): T {
+  if (!store) return fallback;
+  const raw = store.getItem(key);
+  if (raw === null) return fallback;
+  try {
+    return JSON.parse(raw) as T;
+  } catch {
+    return fallback;
+  }
+}
+
+function writeJson(store: StorageLike | null, key: string, value: unknown): void {
+  if (!store) return;
+  try {
+    store.setItem(key, JSON.stringify(value));
+  } catch {
+    // 配額滿或隱私模式,靜默放棄:記不住進度不該讓頁面壞掉
+  }
+}
+
+export function readProgress(store: StorageLike | null = defaultStore()): ProgressMap {
+  const parsed = readJson<ProgressMap>(store, PROGRESS_KEY, {});
+  if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
+  return parsed;
+}
+
+export function saveProgress(
+  slug: string,
+  entry: ProgressEntry,
+  store: StorageLike | null = defaultStore()
+): void {
+  const map = readProgress(store);
+  map[slug] = entry;
+  writeJson(store, PROGRESS_KEY, map);
+}
+
+export function readFavorites(store: StorageLike | null = defaultStore()): string[] {
+  const parsed = readJson<unknown>(store, FAVORITES_KEY, []);
+  if (!Array.isArray(parsed)) return [];
+  return parsed.filter((v): v is string => typeof v === 'string');
+}
+
+export function toggleFavorite(
+  slug: string,
+  store: StorageLike | null = defaultStore()
+): string[] {
+  const current = readFavorites(store);
+  const next = current.includes(slug)
+    ? current.filter((s) => s !== slug)
+    : [...current, slug];
+  writeJson(store, FAVORITES_KEY, next);
+  return next;
+}
+
+export function isFavorite(
+  slug: string,
+  store: StorageLike | null = defaultStore()
+): boolean {
+  return readFavorites(store).includes(slug);
+}
