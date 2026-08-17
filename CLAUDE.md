@@ -31,7 +31,7 @@ npm run preview   # 本地預覽建置結果
 
 ## 架構總覽
 
-- **Astro 靜態輸出 + React islands**:內容頁本身零 JS;互動元件用 `client:visible`,進入視窗才載入對應 JS。
+- **Astro 靜態輸出 + React islands**:文章頁的閱讀層元件(進度條、繼續閱讀提示、目錄、收藏按鈕)用 `client:load`,因為必須在使用者第一次捲動前就掛載好,無法等進入視窗;搜尋(`SearchDialog`)用 `client:idle`,所以會隨全站每一頁(包含 portfolio 首頁 `/`)一起出貨;文章內的視覺化元件(mermaid/markmap 以外、用 xyflow 或 recharts 產生的)仍用 `client:visible`,進入視窗才載入對應 JS。
 - **內容模型**(`src/content.config.ts`):文章是 `src/content/blog/*.mdx`,用 `glob` loader 讀取,schema(zod)驗證:
   - 必填:`title: string`、`description: string`、`pubDate`(`z.coerce.date()`,frontmatter 直接寫 `2026-08-12` 這種裸日期就會被 coerce 成 Date)
   - 選填:`tags: string[]`(預設 `[]`)、`draft: boolean`(預設 `false`,`true` 的文章不會出現在 `/blog`、標籤頁或建置出的路由)
