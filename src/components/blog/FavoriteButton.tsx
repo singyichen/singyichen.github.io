@@ -16,8 +16,7 @@ export default function FavoriteButton({ slug }: { slug: string }) {
       className={fav ? 'fav-btn is-on' : 'fav-btn'}
       aria-pressed={fav}
       onClick={() => {
-        toggleFavorite(slug);
-        setFav((v) => !v);
+        setFav(toggleFavorite(slug).includes(slug));
       }}
     >
       {fav ? '★ 已收藏' : '☆ 收藏'}
