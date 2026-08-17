@@ -20,13 +20,14 @@ Mandy Chen 的個人網站(https://singyichen.github.io),以 GitHub Pages 發佈
 
 ```bash
 npm run dev       # 開發伺服器(熱重載)
-npm run build     # 建置到 dist/;通過 = frontmatter(zod)、MDX、元件、路由皆合法 —— commit 前必須跑過
+npm run test      # vitest,只涵蓋 src/lib/ 的純函式
+npm run build     # astro build + pagefind 索引;通過 = frontmatter、MDX、元件、路由皆合法 —— commit 前必須跑過
 npm run preview   # 本地預覽建置結果
 ```
 
-沒有測試指令(這個專案的 `package.json` 沒有 devDependencies / test script);`npm run build` 是唯一的正確性把關。
+測試只涵蓋 `src/lib/` 的純函式(vitest);元件與頁面仍以 `npm run build` 加人工檢查把關。
 
-部署:push 到 `main` 由 `.github/workflows/deploy.yml`(`actions/checkout` + `withastro/action@v3`,鎖 `node-version: '22'`)自動建置並發佈到 GitHub Pages。**GitHub repo 設定需要手動切一次**:Settings → Pages → Build and deployment → Source 選 **GitHub Actions**(不切的話 workflow 跑綠也不會生效)。
+部署:push 到 `main` 由 `.github/workflows/deploy.yml` 自動建置並發佈到 GitHub Pages。workflow 用明確步驟(`actions/checkout` → `actions/setup-node`〔鎖 `node-version: '22'`〕→ `npm ci` → `npm run build` → `upload-pages-artifact`),**不用** `withastro/action`——因為 build 現在是兩階段(`astro build` 之後還要跑 `pagefind --site dist` 產生搜尋索引),`withastro/action` 只知道跑 `astro build`,不會執行第二階段。**GitHub repo 設定需要手動切一次**:Settings → Pages → Build and deployment → Source 選 **GitHub Actions**(不切的話 workflow 跑綠也不會生效)。
 
 ## 架構總覽
 
@@ -37,7 +38,11 @@ npm run preview   # 本地預覽建置結果
   - 路由:`src/pages/blog/index.astro`(列表)、`src/pages/blog/[...slug].astro`(單篇,`params.slug` 對應 `post.id`)、`src/pages/blog/tags/[tag].astro`(標籤頁,`getStaticPaths` 掃全部文章的 `tags` 自動生成,不維護標籤清單)
 - **Layout**:`src/layouts/BaseLayout.astro`(全站殼:`<head>` FOUC-avoidance script、nav、主題切換 button、`site-footer`)→ `src/layouts/PostLayout.astro`(文章標題/日期/標籤 header,並在 `<script>` 裡呼叫 `initDiagrams()`)
 - **雙主題**:tokens 定義在 `src/styles/global.css` 的 `:root`(淺色:`--bg #fdfdfc`、`--accent #0e7c66` 等)與 `[data-theme='dark']`(深色:`--bg #0f1115`、`--accent #7dd3c0` 等)。`BaseLayout.astro` 的 `<head>` 有 `is:inline` script,依 localStorage 或 `prefers-color-scheme` 先決定 `document.documentElement.dataset.theme`,避免 FOUC;手動切換按鈕會更新 `data-theme`、寫 localStorage,並 `dispatchEvent(new CustomEvent('themechange'))`,讓元件與圖表重新取色/重繪。
-- **明確不做(YAGNI)**:全文搜尋、RSS、sitemap、留言、列表分頁、Tailwind。
+- **明確不做(YAGNI)**:RSS、sitemap、留言、列表分頁、Tailwind。
+- **新增目錄**:`src/lib/`(純資料函式,零 DOM,`.astro` 與 `.tsx` 共用)、
+  `src/components/blog/`(跨文章的站台元件:目錄、進度條、收藏、搜尋)。
+  閱讀進度與收藏的 localStorage 存取一律經過 `src/lib/reading-progress.ts`,
+  元件不直接碰 localStorage。
 
 ## 寫一篇文章
 
