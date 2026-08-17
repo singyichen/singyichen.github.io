@@ -40,7 +40,7 @@ npm run preview   # 本地預覽建置結果
 - **雙主題**:tokens 定義在 `src/styles/global.css` 的 `:root`(淺色:`--bg #fdfdfc`、`--accent #0e7c66` 等)與 `[data-theme='dark']`(深色:`--bg #0f1115`、`--accent #7dd3c0` 等)。`BaseLayout.astro` 的 `<head>` 有 `is:inline` script,依 localStorage 或 `prefers-color-scheme` 先決定 `document.documentElement.dataset.theme`,避免 FOUC;手動切換按鈕會更新 `data-theme`、寫 localStorage,並 `dispatchEvent(new CustomEvent('themechange'))`,讓元件與圖表重新取色/重繪。
 - **明確不做(YAGNI)**:RSS、sitemap、留言、列表分頁、Tailwind。
 - **新增目錄**:`src/lib/`(純資料函式,零 DOM,`.astro` 與 `.tsx` 共用)、
-  `src/components/blog/`(跨文章的站台元件:目錄、進度條、收藏、搜尋)。
+  `src/components/blog/`(跨文章的站台元件:目錄、進度條、繼續閱讀提示、收藏、搜尋)。
   閱讀進度與收藏的 localStorage 存取一律經過 `src/lib/reading-progress.ts`,
   元件不直接碰 localStorage。
 
