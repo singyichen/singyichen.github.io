@@ -22,17 +22,36 @@ export function isReading(entry: ProgressEntry): boolean {
   return entry.pct >= STARTED_PCT && entry.pct < FINISHED_PCT;
 }
 
+/**
+ * 「有效條目」的唯一定義:pct、scrollY、at 都必須是有限數值。
+ * readProgress 用它過濾整批資料,pickResume 用它保護單筆輸入 ——
+ * 兩個讀取路徑共用同一份判斷,不要各自維護一套驗證邏輯。
+ */
+export function isValidEntry(value: unknown): value is ProgressEntry {
+  if (value === null || typeof value !== 'object') return false;
+  const v = value as Record<string, unknown>;
+  return (
+    typeof v.pct === 'number' &&
+    Number.isFinite(v.pct) &&
+    typeof v.scrollY === 'number' &&
+    Number.isFinite(v.scrollY) &&
+    typeof v.at === 'number' &&
+    Number.isFinite(v.at)
+  );
+}
+
 export function pickResume(
   map: ProgressMap
 ): { slug: string; entry: ProgressEntry } | null {
   let best: { slug: string; entry: ProgressEntry } | null = null;
 
   // 此函式接收來自 localStorage 解析的資料,無型別保證。
-  // 即使 pct 或 at 符合 isReading() 邏輯,仍需驗證它們是有效的數值,
-  // 否則 NaN 會導致 tie-break 比較永久失效、無法再被新的有效資料取代。
+  // 即使 pct 符合 isReading() 邏輯,仍需驗證整筆條目是有效的數值,
+  // 否則 NaN/Infinity 會導致 tie-break 比較永久失效、或帶著壞掉的
+  // scrollY 被選中。
   for (const [slug, entry] of Object.entries(map)) {
+    if (!isValidEntry(entry)) continue;
     if (!isReading(entry)) continue;
-    if (!Number.isFinite(entry.pct) || !Number.isFinite(entry.at)) continue;
     if (best === null || entry.at > best.entry.at) {
       best = { slug, entry };
     }
@@ -81,7 +100,11 @@ function writeJson(store: StorageLike | null, key: string, value: unknown): void
 export function readProgress(store: StorageLike | null = defaultStore()): ProgressMap {
   const parsed = readJson<ProgressMap>(store, PROGRESS_KEY, {});
   if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
-  return parsed;
+  const result: ProgressMap = {};
+  for (const [slug, entry] of Object.entries(parsed)) {
+    if (isValidEntry(entry)) result[slug] = entry;
+  }
+  return result;
 }
 
 export function saveProgress(

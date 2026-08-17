@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   isFinished,
   isReading,
+  isValidEntry,
   pickResume,
   type ProgressMap,
 } from './reading-progress';
@@ -120,6 +121,44 @@ describe('readProgress', () => {
     const store = fakeStore();
     saveProgress('a', { pct: 42, scrollY: 500, at: 123 }, store);
     expect(readProgress(store)).toEqual({ a: { pct: 42, scrollY: 500, at: 123 } });
+  });
+
+  it('過濾掉損毀的條目(例如 scrollY 是 NaN),保留有效的其他條目', () => {
+    const store = fakeStore({
+      [PROGRESS_KEY]: JSON.stringify({
+        corrupted: { pct: 50, scrollY: NaN, at: 1 },
+        valid: { pct: 30, scrollY: 100, at: 2 },
+      }),
+    });
+    expect(readProgress(store)).toEqual({ valid: { pct: 30, scrollY: 100, at: 2 } });
+  });
+});
+
+describe('isValidEntry', () => {
+  it('三個欄位皆為有限數值時視為有效', () => {
+    expect(isValidEntry({ pct: 50, scrollY: 100, at: 1000 })).toBe(true);
+  });
+
+  it('pct 非有限數值時視為無效', () => {
+    expect(isValidEntry({ pct: NaN, scrollY: 100, at: 1000 })).toBe(false);
+    expect(isValidEntry({ pct: Infinity, scrollY: 100, at: 1000 })).toBe(false);
+  });
+
+  it('scrollY 非有限數值時視為無效', () => {
+    expect(isValidEntry({ pct: 50, scrollY: NaN, at: 1000 })).toBe(false);
+    expect(isValidEntry({ pct: 50, scrollY: Infinity, at: 1000 })).toBe(false);
+  });
+
+  it('at 非有限數值時視為無效', () => {
+    expect(isValidEntry({ pct: 50, scrollY: 100, at: NaN })).toBe(false);
+    expect(isValidEntry({ pct: 50, scrollY: 100, at: Infinity })).toBe(false);
+  });
+
+  it('非物件或缺欄位時視為無效', () => {
+    expect(isValidEntry(null)).toBe(false);
+    expect(isValidEntry(undefined)).toBe(false);
+    expect(isValidEntry('nope')).toBe(false);
+    expect(isValidEntry({ pct: 50 })).toBe(false);
   });
 });
 
