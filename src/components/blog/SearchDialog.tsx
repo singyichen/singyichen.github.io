@@ -15,22 +15,31 @@ export default function SearchDialog() {
   const [term, setTerm] = useState('');
   const [results, setResults] = useState<Result[]>([]);
   const [unavailable, setUnavailable] = useState(false);
+  const [ready, setReady] = useState(false);
   const api = useRef<PagefindApi | null>(null);
+  const loading = useRef(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const previouslyFocused = useRef<HTMLElement | null>(null);
 
   const load = useCallback(async () => {
-    if (api.current || unavailable) return;
+    // 只有「正在進行中的載入」需要擋重複呼叫;失敗與否不記在這個 guard 上,
+    // 讓下一次 load() 有機會重試 —— 單次網路失敗不該讓搜尋整個 session 失效。
+    if (api.current || loading.current) return;
+    loading.current = true;
+    setUnavailable(false);
     try {
       // dev 模式下 /pagefind/ 不存在(索引只在 build 時產生),
       // @vite-ignore 讓 Vite 不要在建置階段嘗試解析這個路徑。
       const pagefindPath = '/pagefind/pagefind.js';
       const mod = await import(/* @vite-ignore */ pagefindPath);
       api.current = mod as PagefindApi;
+      setReady(true);
     } catch {
       setUnavailable(true);
+    } finally {
+      loading.current = false;
     }
-  }, [unavailable]);
+  }, []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -48,9 +57,8 @@ export default function SearchDialog() {
       if (e.key === 'Escape') setOpen(false);
     };
 
-    // nav 上的按鈕透過自訂事件開啟,兩個監聽器都必須在 cleanup 移除:
-    // 這個 effect 的相依是 load,而 load 會隨 unavailable 改變而重建,
-    // 只移除其中一個會在重跑時累積出重複的監聽器。
+    // nav 上的按鈕透過自訂事件開啟,兩個監聽器都要在 cleanup 一起移除,
+    // 否則 effect 重跑時會累積出重複的監聽器。
     const onOpenRequest = () => {
       setOpen(true);
       void load();
@@ -76,7 +84,7 @@ export default function SearchDialog() {
   }, [open]);
 
   useEffect(() => {
-    if (!open || !term.trim() || !api.current) {
+    if (!open || !term.trim() || !ready) {
       setResults([]);
       return;
     }
@@ -95,7 +103,7 @@ export default function SearchDialog() {
     return () => {
       cancelled = true;
     };
-  }, [term, open]);
+  }, [term, open, ready]);
 
   if (!open) return null;
 
@@ -124,7 +132,11 @@ export default function SearchDialog() {
           </p>
         )}
 
-        {!unavailable && term.trim() !== '' && results.length === 0 && (
+        {!unavailable && term.trim() !== '' && !ready && (
+          <p className="search-hint">搜尋索引載入中…</p>
+        )}
+
+        {!unavailable && term.trim() !== '' && ready && results.length === 0 && (
           <p className="search-hint">找不到符合的文章。</p>
         )}
 
