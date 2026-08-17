@@ -59,7 +59,12 @@ export default function ReadingProgressBar({ slug }: { slug: string }) {
 
   return (
     <div className="reading-bar" role="presentation">
-      <div className="reading-bar-fill" style={{ width: `${pct}%` }} />
+      {/*
+        用 transform: scaleX 而不是 width:改 width 每一幀都會觸發 layout + paint,
+        文章頁還掛著 mermaid / xyflow / recharts 等重元件,容易掉幀而看起來一頓一頓。
+        transform 由合成層處理,不動 layout。
+      */}
+      <div className="reading-bar-fill" style={{ transform: `scaleX(${pct / 100})` }} />
     </div>
   );
 }

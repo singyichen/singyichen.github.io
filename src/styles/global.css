@@ -278,7 +278,18 @@ article img, article svg { max-width: 100%; }
 }
 .reading-bar-fill {
   height: 100%;
+  width: 100%;
   background: var(--accent);
+  /* 由 JS 設定 scaleX(0–1)。從左緣長出來,所以原點固定在左側。 */
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  /* 極短的線性過渡:把幀與幀之間補起來,掉一兩幀也不會看到跳動。
+     時間再長會變成「追不上捲動」的橡皮筋感。 */
+  transition: transform 120ms linear;
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reading-bar-fill { transition: none; }
 }
 
 /* ── 繼續閱讀提示 ─────────────────────────────────────────── */
