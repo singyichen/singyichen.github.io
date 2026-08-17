@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
-import { isReading, readProgress } from '../../lib/reading-progress';
+import { isReading, readInitialProgress } from '../../lib/reading-progress';
 
 export default function ResumePrompt({ slug }: { slug: string }) {
   const [target, setTarget] = useState<{ pct: number; scrollY: number } | null>(null);
 
   useEffect(() => {
-    // 只在掛載當下讀一次:此時 ReadingProgressBar 尚未寫入本次的進度,
-    // 讀到的是上次離開時的狀態。
-    const entry = readProgress()[slug];
+    // readInitialProgress 快照確保讀到的永遠是這次造訪之前的狀態,
+    // 與 ReadingProgressBar 的掛載順序無關。
+    const entry = readInitialProgress()[slug];
     if (!entry || !isReading(entry) || entry.scrollY <= 0) return;
     // 已經捲到該位置附近就不用提示了(例如瀏覽器自己還原了捲動位置)
     if (Math.abs(window.scrollY - entry.scrollY) < 200) return;

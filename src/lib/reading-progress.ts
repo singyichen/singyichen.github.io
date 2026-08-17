@@ -118,3 +118,27 @@ export function isFavorite(
 ): boolean {
   return readFavorites(store).includes(slug);
 }
+
+/**
+ * 模組載入後第一次呼叫時把進度表快照起來,之後一律回傳同一份。
+ *
+ * 為什麼需要:進度條與繼續閱讀提示是兩個各自獨立的 client:load island,
+ * 誰先掛載沒有保證。提示必須看到「這次造訪之前」的進度;若它直接讀
+ * localStorage,可能讀到進度條剛寫入的本次資料。快照讓讀取結果與掛載
+ * 順序完全無關。
+ */
+let initialProgress: ProgressMap | null = null;
+
+export function readInitialProgress(
+  store: StorageLike | null = defaultStore()
+): ProgressMap {
+  if (initialProgress === null) {
+    initialProgress = readProgress(store);
+  }
+  return initialProgress;
+}
+
+/** 僅供測試:清除快照,讓下一次 readInitialProgress 重新讀取。 */
+export function resetInitialProgress(): void {
+  initialProgress = null;
+}

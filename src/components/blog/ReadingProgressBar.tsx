@@ -8,6 +8,7 @@ export default function ReadingProgressBar({ slug }: { slug: string }) {
   const [pct, setPct] = useState(0);
   const frame = useRef(0);
   const lastSaved = useRef(0);
+  const hasScrolled = useRef(false);
 
   useEffect(() => {
     const compute = (force: boolean) => {
@@ -16,6 +17,10 @@ export default function ReadingProgressBar({ slug }: { slug: string }) {
       const next = max <= 0 ? 100 : Math.min(100, Math.max(0, (window.scrollY / max) * 100));
       setPct(next);
 
+      // 使用者還沒真的捲動過就不寫入:一開啟文章就寫會用 0% 覆蓋掉上次的
+      // 進度,把「讀到一半」的紀錄清掉,繼續閱讀提示也就永遠不會出現。
+      if (!hasScrolled.current) return;
+
       const now = Date.now();
       if (force || now - lastSaved.current >= SAVE_INTERVAL) {
         lastSaved.current = now;
@@ -23,7 +28,7 @@ export default function ReadingProgressBar({ slug }: { slug: string }) {
       }
     };
 
-    const onScroll = () => {
+    const schedule = () => {
       if (frame.current) return;
       frame.current = requestAnimationFrame(() => {
         frame.current = 0;
@@ -31,17 +36,22 @@ export default function ReadingProgressBar({ slug }: { slug: string }) {
       });
     };
 
+    const onScroll = () => {
+      hasScrolled.current = true;
+      schedule();
+    };
+
     // 離開頁面時強制寫一次,確保最後的位置有被記住
     const onLeave = () => compute(true);
 
     compute(false);
     window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll);
+    window.addEventListener('resize', schedule);
     window.addEventListener('pagehide', onLeave);
 
     return () => {
       window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
+      window.removeEventListener('resize', schedule);
       window.removeEventListener('pagehide', onLeave);
       if (frame.current) cancelAnimationFrame(frame.current);
     };

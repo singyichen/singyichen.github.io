@@ -87,6 +87,8 @@ import {
   readFavorites,
   toggleFavorite,
   isFavorite,
+  readInitialProgress,
+  resetInitialProgress,
   PROGRESS_KEY,
   FAVORITES_KEY,
   type StorageLike,
@@ -165,5 +167,45 @@ describe('favorites', () => {
     expect(isFavorite('a', store)).toBe(false);
     toggleFavorite('a', store);
     expect(isFavorite('a', store)).toBe(true);
+  });
+});
+
+describe('readInitialProgress', () => {
+  it('第一次呼叫時讀 store 內容', () => {
+    resetInitialProgress();
+    const store = fakeStore();
+    saveProgress('a', { pct: 50, scrollY: 100, at: 1000 }, store);
+    const snap = readInitialProgress(store);
+    expect(snap).toEqual({ a: { pct: 50, scrollY: 100, at: 1000 } });
+  });
+
+  it('第二次呼叫回傳同一份快照,即使 store 已變', () => {
+    resetInitialProgress();
+    const store = fakeStore();
+    saveProgress('a', { pct: 50, scrollY: 100, at: 1000 }, store);
+    const snap1 = readInitialProgress(store);
+
+    // 在 store 寫入新資料
+    saveProgress('a', { pct: 99, scrollY: 900, at: 2000 }, store);
+    const snap2 = readInitialProgress(store);
+
+    // snap1 和 snap2 應相同,都是第一次讀的快照
+    expect(snap1).toEqual(snap2);
+    expect(snap1.a.pct).toBe(50); // 仍是舊的
+    expect(readProgress(store).a.pct).toBe(99); // 但 readProgress 已更新
+  });
+
+  it('resetInitialProgress 後下次呼叫重新讀取', () => {
+    resetInitialProgress();
+    const store = fakeStore();
+    saveProgress('a', { pct: 50, scrollY: 100, at: 1000 }, store);
+    const snap1 = readInitialProgress(store);
+
+    resetInitialProgress();
+    saveProgress('a', { pct: 99, scrollY: 900, at: 2000 }, store);
+    const snap2 = readInitialProgress(store);
+
+    expect(snap1.a.pct).toBe(50);
+    expect(snap2.a.pct).toBe(99);
   });
 });
