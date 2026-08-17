@@ -2,6 +2,8 @@
 import BaseLayout from './BaseLayout.astro';
 import ReadingProgressBar from '../components/blog/ReadingProgressBar.tsx';
 import ResumePrompt from '../components/blog/ResumePrompt.tsx';
+import Toc from '../components/blog/Toc.tsx';
+import type { TocHeading } from '../components/blog/Toc.tsx';
 
 interface Props {
   title: string;
@@ -9,8 +11,9 @@ interface Props {
   pubDate: Date;
   tags: string[];
   slug: string;
+  headings: TocHeading[];
 }
-const { title, description, pubDate, tags, slug } = Astro.props;
+const { title, description, pubDate, tags, slug, headings } = Astro.props;
 const dateStr = pubDate.toISOString().slice(0, 10);
 ---
 
@@ -24,6 +27,7 @@ const dateStr = pubDate.toISOString().slice(0, 10);
         {tags.map((t) => <a class="post-tag" href={`/blog/tags/${t}`}>{t}</a>)}
       </div>
     </header>
+    <Toc headings={headings} client:load />
     <ResumePrompt slug={slug} client:load />
     <slot />
   </article>

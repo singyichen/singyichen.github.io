@@ -320,3 +320,56 @@ article img, article svg { max-width: 100%; }
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
+
+/* ── 文章目錄 ─────────────────────────────────────────────── */
+.toc { margin-bottom: 28px; }
+
+.toc-toggle {
+  font: inherit;
+  font-size: 13px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 3px 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.toc-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.toc-list {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  border-left: 1px solid var(--border);
+}
+.toc-list.is-open { display: flex; }
+
+.toc-item { padding-left: 14px; }
+.toc-d3 { padding-left: 30px; }
+
+.toc-link {
+  color: var(--text-muted);
+  font-size: 13.5px;
+  line-height: 1.5;
+  text-decoration: none;
+}
+.toc-link:hover { color: var(--text); text-decoration: none; }
+.toc-link.is-active { color: var(--accent); }
+
+/* 視窗夠寬時移到右側固定欄,不擠壓 720px 的閱讀寬度 */
+@media (min-width: 1200px) {
+  .toc {
+    position: fixed;
+    top: 96px;
+    left: calc(50% + 380px);
+    width: 220px;
+    max-height: calc(100vh - 140px);
+    overflow-y: auto;
+    margin-bottom: 0;
+  }
+  .toc-toggle { display: none; }
+  .toc-list { display: flex; margin-top: 0; }
+}
