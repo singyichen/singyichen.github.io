@@ -25,7 +25,16 @@ npm run build     # astro build + pagefind 索引;通過 = frontmatter、MDX、�
 npm run preview   # 本地預覽建置結果
 ```
 
-測試只涵蓋 `src/lib/` 的純函式(vitest);元件與頁面仍以 `npm run build` 加人工檢查把關。
+測試只涵蓋 `src/lib/` 的純函式(vitest)。元件與頁面的**互動行為**改用 `.claude/uiprobe/` 的 Playwright 探針量測,由 `ui-behavior-verifier` agent 操作:
+
+```bash
+cd .claude/uiprobe && npm install && npx playwright install chromium   # 只需一次
+node probe.mjs help                                                    # 指令與選項
+node probe.mjs scrollspy --url http://localhost:4321/blog/<slug>/      # 目錄高亮
+node probe.mjs anchor|track|wheel|health|shot --url <URL>
+```
+
+目錄高亮、進度條、錨點捲動、滾輪穿透這類行為看程式碼推論不出來、build 通過也證明不了,一律先量再下結論。踩過的陷阱寫在 `.claude/agents/ui-behavior-verifier.md`(最重要的一條:全站 `scroll-behavior: smooth` 會讓 `scrollTop = X` 變成動畫,程式化捲動必須用 `scrollTo({ behavior: 'instant' })`,否則量出來的結論是錯的)。
 
 部署:push 到 `main` 由 `.github/workflows/deploy.yml` 自動建置並發佈到 GitHub Pages。workflow 用明確步驟(`actions/checkout` → `actions/setup-node`〔鎖 `node-version: '22'`〕→ `npm ci` → `npm run build` → `upload-pages-artifact`),**不用** `withastro/action`——因為 build 現在是兩階段(`astro build` 之後還要跑 `pagefind --site dist` 產生搜尋索引),`withastro/action` 只知道跑 `astro build`,不會執行第二階段。**GitHub repo 設定需要手動切一次**:Settings → Pages → Build and deployment → Source 選 **GitHub Actions**(不切的話 workflow 跑綠也不會生效)。
 
