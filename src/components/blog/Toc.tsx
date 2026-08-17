@@ -25,9 +25,15 @@ export default function Toc({ headings }: { headings: TocHeading[] }) {
 
     const observer = new IntersectionObserver(
       (entries) => {
-        for (const e of entries) {
-          if (e.isIntersecting) setActive(e.target.id);
-        }
+        // 一次回呼可能同時有多個標題落在觸發帶內(例如 ## 後面緊接 ###),
+        // 而 entries 的順序由實作決定、不保證是文件順序。取最靠近視窗頂端
+        // 的那一個,才是讀者實際所在的段落。
+        const visible = entries.filter((e) => e.isIntersecting);
+        if (visible.length === 0) return;
+        const topmost = visible.reduce((a, b) =>
+          a.boundingClientRect.top <= b.boundingClientRect.top ? a : b
+        );
+        setActive(topmost.target.id);
       },
       // 只讓靠近視窗頂端的標題算「當前」,否則整頁的標題都會是 intersecting
       { rootMargin: '0px 0px -75% 0px', threshold: 0 }

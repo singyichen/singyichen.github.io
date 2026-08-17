@@ -358,6 +358,7 @@ article img, article svg { max-width: 100%; }
 }
 .toc-link:hover { color: var(--text); text-decoration: none; }
 .toc-link.is-active { color: var(--accent); }
+.toc-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* 視窗夠寬時移到右側固定欄,不擠壓 720px 的閱讀寬度 */
 @media (min-width: 1200px) {
