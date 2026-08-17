@@ -23,7 +23,17 @@
 
 * { box-sizing: border-box; }
 
-html { color-scheme: light; }
+html {
+  color-scheme: light;
+  /* 目錄與內文的錨點連結改成滑動而非瞬移。純 <a href="#…"> 預設是瞬間跳轉,
+     讀者會失去「跳到哪裡」的方向感。 */
+  scroll-behavior: smooth;
+  /* 落點往下讓一點,標題不要貼齊視窗最頂端。 */
+  scroll-padding-top: 24px;
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
 [data-theme='dark'] { color-scheme: dark; }
 
 body {
