@@ -17,6 +17,7 @@ export default function SearchDialog() {
   const [unavailable, setUnavailable] = useState(false);
   const api = useRef<PagefindApi | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const previouslyFocused = useRef<HTMLElement | null>(null);
 
   const load = useCallback(async () => {
     if (api.current || unavailable) return;
@@ -64,7 +65,14 @@ export default function SearchDialog() {
   }, [load]);
 
   useEffect(() => {
-    if (open) inputRef.current?.focus();
+    if (open) {
+      // 記住開啟前的焦點元素,關閉時(Esc、點背景)還給它,
+      // 避免鍵盤使用者在關閉後失去焦點位置。
+      previouslyFocused.current = document.activeElement as HTMLElement | null;
+      inputRef.current?.focus();
+    } else {
+      previouslyFocused.current?.focus();
+    }
   }, [open]);
 
   useEffect(() => {
@@ -74,9 +82,15 @@ export default function SearchDialog() {
     }
     let cancelled = false;
     void (async () => {
-      const search = await api.current!.search(term);
-      const data = await Promise.all(search.results.slice(0, 8).map((r) => r.data()));
-      if (!cancelled) setResults(data);
+      try {
+        const search = await api.current!.search(term);
+        const data = await Promise.all(search.results.slice(0, 8).map((r) => r.data()));
+        if (!cancelled) setResults(data);
+      } catch {
+        // 索引載入成功但查詢失敗(索引檔損毀、抓取中斷等)。清空結果讓
+        // 既有的「找不到符合的文章」訊息接手,不要讓 rejection 逸出到 console。
+        if (!cancelled) setResults([]);
+      }
     })();
     return () => {
       cancelled = true;
