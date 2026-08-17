@@ -3,6 +3,7 @@ import BaseLayout from './BaseLayout.astro';
 import ReadingProgressBar from '../components/blog/ReadingProgressBar.tsx';
 import ResumePrompt from '../components/blog/ResumePrompt.tsx';
 import Toc from '../components/blog/Toc.tsx';
+import FavoriteButton from '../components/blog/FavoriteButton.tsx';
 import type { TocHeading } from '../components/blog/Toc.tsx';
 
 interface Props {
@@ -25,6 +26,7 @@ const dateStr = pubDate.toISOString().slice(0, 10);
       <div class="post-meta">
         <time datetime={dateStr}>{dateStr}</time>
         {tags.map((t) => <a class="post-tag" href={`/blog/tags/${t}`}>{t}</a>)}
+        <FavoriteButton slug={slug} client:load />
       </div>
     </header>
     <Toc headings={headings} client:load />
