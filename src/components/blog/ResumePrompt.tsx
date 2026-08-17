@@ -23,7 +23,8 @@ export default function ResumePrompt({ slug }: { slug: string }) {
         type="button"
         className="resume-go"
         onClick={() => {
-          window.scrollTo({ top: target.scrollY, behavior: 'smooth' });
+          const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          window.scrollTo({ top: target.scrollY, behavior: reduceMotion ? 'auto' : 'smooth' });
           setTarget(null);
         }}
       >
