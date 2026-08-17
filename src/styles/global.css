@@ -227,7 +227,25 @@ article img, article svg { max-width: 100%; }
   right: 8px;
   z-index: 2;
   display: flex;
+  align-items: center;
   gap: 6px;
+}
+/* 縮放需要修飾鍵,不講讀者不會知道。滑過圖表才顯示,平時不干擾閱讀。 */
+.diagram-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 1px 8px;
+  opacity: 0;
+  transition: opacity 150ms ease;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.diagram:hover .diagram-hint { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .diagram-hint { transition: none; }
 }
 .diagram-btn {
   background: var(--bg);

@@ -73,6 +73,16 @@ async function renderMarkmap(): Promise<void> {
       const svg = b.container.querySelector<SVGSVGElement>('svg')!;
       const { root } = transformer.transform(b.source);
       Markmap.create(svg, { autoFit: true }, root);
+      // markmap 內建滾輪縮放,同樣會吃掉頁面捲動。它把監聽掛在 svg 上,所以在
+      // 外層的 capture 階段攔截:沒按修飾鍵就不讓事件傳下去,頁面照常捲動;
+      // 按住 ⌘/Ctrl 才放行給 markmap 縮放。此處不呼叫 preventDefault。
+      b.container.addEventListener(
+        'wheel',
+        (e) => {
+          if (!e.ctrlKey && !e.metaKey) e.stopPropagation();
+        },
+        { capture: true }
+      );
     } catch (err) {
       b.container.innerHTML = `<pre class="diagram-error">Markmap 渲染失敗:${escapeHtml(
         String(err)
@@ -84,6 +94,7 @@ async function renderMarkmap(): Promise<void> {
 function mountInteractive(container: HTMLElement, svg: string): void {
   container.innerHTML = `
     <div class="diagram-toolbar">
+      <span class="diagram-hint">⌘/Ctrl + 滾輪縮放,拖曳平移</span>
       <button class="diagram-btn" data-action="reset" title="重設縮放">⟲</button>
       <button class="diagram-btn" data-action="fullscreen" title="全螢幕">⛶</button>
     </div>
@@ -99,6 +110,10 @@ function mountInteractive(container: HTMLElement, svg: string): void {
   viewport.addEventListener(
     'wheel',
     (e) => {
+      // 只有按住 Ctrl / ⌘ 才縮放。無條件吃掉滾輪的話,游標掃過圖表時整頁就停住
+      // 改成縮放圖表,讀者會以為頁面卡住。macOS 觸控板的雙指捏合本身就會送出
+      // ctrlKey=true 的 wheel 事件,所以捏合縮放仍然自然可用。
+      if (!e.ctrlKey && !e.metaKey) return;
       e.preventDefault();
       scale = Math.min(8, Math.max(0.3, scale * (e.deltaY < 0 ? 1.15 : 0.87)));
       apply();

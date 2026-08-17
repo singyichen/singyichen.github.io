@@ -80,6 +80,13 @@ export default function RagPipelineFlow() {
           onNodesChange={onNodesChange}
           fitView
           proOptions={{ hideAttribution: true }}
+          /*
+            預設 zoomOnScroll + preventScrolling 會吃掉滾輪:游標掃過圖時整頁停住
+            改成縮放圖表,讀者會以為頁面卡住。改成滾輪一律捲頁面,縮放交給
+            左下角的 Controls 按鈕與觸控板捏合。
+          */
+          zoomOnScroll={false}
+          preventScrolling={false}
         >
           <Background />
           <Controls showInteractive={false} />
