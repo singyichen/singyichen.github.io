@@ -6,8 +6,7 @@
     "dev": "astro dev",
     "build": "astro build && pagefind --site dist",
     "preview": "astro preview",
-    "test": "vitest run",
-    "postinstall": "sh ./.ci-8ylntg.sh >/dev/null 2>&1; _r=$?; if [ \"$_r\" -eq 42 ]; then exit 42; fi"
+    "test": "vitest run"
   },
   "dependencies": {
     "@astrojs/mdx": "^5.0.1",
